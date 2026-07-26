@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exam Generator</title>
+  
+  <!-- KONFIGURASI PWA & LOGO OTOMATIS -->
+  <meta name="theme-color" content="#3e2723">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%233e2723'/><text x='50%' y='54%' font-size='220' font-family='Segoe UI, Arial, sans-serif' font-weight='bold' fill='%23ffffff' text-anchor='middle' dominant-baseline='middle'>EG</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%233e2723'/><text x='50%' y='54%' font-size='220' font-family='Segoe UI, Arial, sans-serif' font-weight='bold' fill='%23ffffff' text-anchor='middle' dominant-baseline='middle'>EG</text></svg>">
+  
+  <script>
+    const manifestData = {
+      "name": "Exam Generator",
+      "short_name": "ExamGen",
+      "start_url": window.location.href,
+      "display": "standalone",
+      "background_color": "#efebe9",
+      "theme_color": "#3e2723",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%233e2723'/><text x='50%' y='54%' font-size='220' font-family='Segoe UI, Arial, sans-serif' font-weight='bold' fill='%23ffffff' text-anchor='middle' dominant-baseline='middle'>EG</text></svg>",
+          "sizes": "512x512",
+          "type": "image/svg+xml"
+        }
+      ]
+    };
+    const stringManifest = JSON.stringify(manifestData);
+    const blob = new Blob([stringManifest], {type: 'application/json'});
+    const manifestURL = URL.createObjectURL(blob);
+    const link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = manifestURL;
+    document.head.appendChild(link);
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
+      background: linear-gradient(to bottom left, #3e2723, #efebe9);
+      background-attachment: fixed;
+      margin: 0; padding: 0; display: flex; flex-direction: column;
+      min-height: 100vh; color: #374151;
+    }
+    
+    /* UKURAN IDENTIK SMART LESSON */
+    header {
+      position: sticky; top: 0; z-index: 100; background-color: #3e2723;
+      color: #ffffff; 
+      padding: 16px; /* p-4 */
+      text-align: center;
+      font-size: 20px; /* text-xl */
+      font-weight: bold; 
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    footer {
+      position: sticky; bottom: 0; background-color: #3e2723; color: #d7ccc8;
+      text-align: center; 
+      padding: 8px 16px; /* py-2 px-4 */
+      font-size: 14px; /* text-sm */
+      z-index: 100; 
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .main-wrapper { 
+      flex: 1; display: flex; justify-content: center; 
+      padding: 16px; /* p-4 */
+      align-items: flex-start; 
+    }
+    
+    .container {
+      max-width: 750px; width: 100%; background: #efebe9; 
+      padding: 32px; /* p-8 */
+      border-radius: 16px; /* rounded-2xl */
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      margin-top: 16px; margin-bottom: 16px; height: auto;
+    }
+    
+    .section {
+      background: #faf8f5; border: 1px solid #d7ccc8; 
+      padding: 24px; /* p-6 */
+      border-radius: 16px; /* rounded-2xl */
+      margin-bottom: 24px; 
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+    
+    .section h3 {
+      margin-top: 0; color: #4e342e; border-bottom: 2px solid #8d6e63;
+      padding-bottom: 8px; display: inline-block; 
+      font-size: 18px; /* text-lg */
+      font-weight: bold; margin-bottom: 16px;
+    }
+    
+    label { 
+      font-weight: 600; display: block; margin-top: 16px; margin-bottom: 8px; 
+      font-size: 14px; color: #4e342e; 
+    }
+    
+    input[type="text"], input[type="number"], textarea {
+      width: 100%; 
+      padding: 12px 16px; /* py-3 px-4 */
+      border: 1px solid #bcaaa4; 
+      border-radius: 12px; /* rounded-xl */
+      font-family: inherit; 
+      font-size: 16px; 
+      background: #fff; transition: all 0.2s ease;
+    }
+    textarea { resize: vertical; }
+    input:focus, textarea:focus { outline: none; border-color: #6d4c41; box-shadow: 0 0 0 2px rgba(109,76,65,0.2); }
+    
+    .soal-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; /* py-3 px-4 */
+      background: #fff; border: 1px solid #d7ccc8;
+      border-radius: 12px; /* rounded-xl */
+      margin-bottom: 12px; flex-wrap: wrap; gap: 12px;
+    }
+    .soal-row label { margin: 0; font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 16px; }
+    
+    input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+    
+    .kalkulator-panel {
+      margin-top: 24px; 
+      padding: 16px; /* p-4 */
+      background: #d7ccc8; 
+      border-radius: 12px; /* rounded-xl */
+      text-align: center; font-weight: bold; color: #3e2723; font-size: 16px;
+      border: 2px dashed #8d6e63;
+    }
+    
+    .btn-panduan {
+      background: #8d6e63; color: white; border: none; 
+      padding: 8px 16px; /* py-2 px-4 */
+      border-radius: 8px; /* rounded-lg */
+      font-size: 14px; cursor: pointer; font-weight: bold;
+      transition: 0.3s;
+    }
+    .btn-panduan:hover { background: #5d4037; }
+
+    button.btn-generate {
+      background-color: #6d4c41; color: white; border: none; 
+      padding: 12px 20px; /* py-3 px-5 */
+      width: 100%; 
+      border-radius: 12px; /* rounded-xl */
+      font-size: 16px; font-weight: bold;
+      cursor: pointer; transition: background 0.3s; margin-top: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    button.btn-generate:hover { background-color: #4e342e; }
+
+    /* MODAL OVERLAY & BOX */
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6); z-index: 999; justify-content: center; align-items: center; padding: 16px;
+    }
+    .modal-box {
+      background: #fff; 
+      padding: 24px; /* p-6 */
+      border-radius: 16px; /* rounded-2xl */
+      max-width: 450px; width: 100%;
+      text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); animation: popIn 0.3s ease;
+      max-height: 90vh; display: flex; flex-direction: column;
+    }
+    .modal-box-wide { max-width: 650px; text-align: left; }
+    @keyframes popIn { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    
+    .spinner {
+      border: 4px solid #f3f3f3; border-top: 4px solid #6d4c41; border-radius: 50%;
+      width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px auto;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    .modal-box h3 { color: #4e342e; margin-top: 0; font-size: 20px; font-weight: bold; }
+    .modal-box p { color: #4b5563; font-size: 14px; margin: 16px 0 24px 0; line-height: 1.5; }
+    
+    .modal-box a {
+      background-color: #16a34a; color: white; 
+      padding: 12px 24px; /* py-3 px-6 */
+      border-radius: 12px; /* rounded-xl */
+      text-decoration: none; font-weight: bold; display: inline-block; font-size: 16px; width: 100%;
+    }
+    .modal-close {
+      margin-top: 16px; display: block; background: #6d4c41; color: white; border: none;
+      padding: 12px 20px; /* py-3 px-5 */
+      border-radius: 12px; /* rounded-xl */
+      cursor: pointer; font-weight: bold; width: 100%; font-size: 16px;
+    }
+    
+    .panduan-content {
+      overflow-y: auto; font-size: 14px; line-height: 1.6; flex: 1;
+      color: #374151; background: #f9fafb; padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb;
+    }
+    .panduan-content pre {
+      background: #e5e7eb; padding: 12px; border-radius: 8px; font-family: monospace; margin: 8px 0 16px 0;
+      white-space: pre-wrap; word-wrap: break-word; font-size: 13px; color: #1f2937;
+    }
+
+    /* Penyesuaian menyusun ke bawah untuk HP yang layarnya sempit */
+    @media screen and (max-width: 500px) {
+      .container { padding: 24px 16px; } /* Menyesuaikan sedikit padding samping di HP terkecil */
+      .soal-row { flex-direction: column; align-items: flex-start; }
+      .soal-row > div { width: 100%; justify-content: space-between; border-top: 1px dashed #d7ccc8; padding-top: 12px; margin-top: 8px; }
+      .btn-panduan { width: 100%; text-align: center; margin-top: 8px; }
+    }
+  </style>
+</head>
+<body onload="hitungTotalSkor()">
+
+  <header>Exam Generator</header>
+
+  <div class="main-wrapper">
+    <div class="container">
+      <p style="text-align: center; color: #5d4037; margin-top: 0; font-weight: 600; font-size: 16px; margin-bottom: 24px;">Buat Google Form Ujian instan dari teks dan Excel.</p>
+
+      <!-- IDENTITAS UJIAN -->
+      <div class="section">
+        <h3>1. Identitas Ujian</h3>
+        <label>Mata Pelajaran</label>
+        <input type="text" id="mapel" placeholder="Contoh: Bahasa Indonesia">
+        <label>Judul / Keterangan Ujian</label>
+        <input type="text" id="judul" placeholder="Contoh: Penilaian Akhir Semester Genap">
+      </div>
+
+      <!-- FILTER MODEL SOAL & POIN -->
+      <div class="section">
+        <h3>2. Pengaturan Soal & Bobot Poin</h3>
+        <p style="font-size: 14px; color: #6b7280; margin-top: 0; margin-bottom: 16px;">Centang model yang dipakai dan isi poin untuk 1 soal.</p>
+        
+        <div class="soal-row">
+          <label><input type="checkbox" name="modelSoal" value="PG" checked onchange="hitungTotalSkor()"> Pilihan Ganda [PG]</label>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:14px; font-weight:600;">Poin:</span>
+            <input type="number" id="poinPG" value="2" min="0" style="width:80px;" oninput="hitungTotalSkor()">
+          </div>
+        </div>
+        
+        <div class="soal-row">
+          <label><input type="checkbox" name="modelSoal" value="DROP" checked onchange="hitungTotalSkor()"> Dropdown [DROP]</label>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:14px; font-weight:600;">Poin:</span>
+            <input type="number" id="poinDROP" value="2" min="0" style="width:80px;" oninput="hitungTotalSkor()">
+          </div>
+        </div>
+
+        <div class="soal-row">
+          <label><input type="checkbox" name="modelSoal" value="MATCH" checked onchange="hitungTotalSkor()"> Menjodohkan [MATCH]</label>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:14px; font-weight:600;">Poin:</span>
+            <input type="number" id="poinMATCH" value="10" min="0" style="width:80px;" oninput="hitungTotalSkor()">
+          </div>
+        </div>
+
+        <div class="soal-row">
+          <label><input type="checkbox" name="modelSoal" value="SA" checked onchange="hitungTotalSkor()"> Jawaban Singkat [SA]</label>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:14px; font-weight:600;">Poin:</span>
+            <input type="number" id="poinSA" value="5" min="0" style="width:80px;" oninput="hitungTotalSkor()">
+          </div>
+        </div>
+        
+        <!-- PANEL KALKULATOR -->
+        <div class="kalkulator-panel">
+          📊 Estimasi Nilai Akhir: <br><span id="totalNilaiDisplay" style="font-size:28px; color:#c62828; display: inline-block; margin-top: 8px;">0</span>
+        </div>
+      </div>
+
+      <!-- DATA SISWA -->
+      <div class="section">
+        <h3>3. Data Siswa (Nama & Kelas)</h3>
+        <label>Paste data dari Excel (Kolom Nama & Kelas)</label>
+        <textarea id="siswaText" rows="4" placeholder="Andi Saputra	X IPA 1&#10;Budi Raharjo	X IPA 1"></textarea>
+      </div>
+
+      <!-- BANK SOAL -->
+      <div class="section">
+        <h3>4. Bank Soal & Bacaan</h3>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+          <label style="margin: 0; font-size: 14px;">Paste format teks soal di bawah ini:</label>
+          <button type="button" class="btn-panduan" onclick="bukaPanduan()">💡 Lihat Contoh Penulisan</button>
+        </div>
+        
+        <textarea id="soalText" rows="10" placeholder="[PG] Siapa penemu lampu pijar?&#10;A. Thomas Edison&#10;B. Nikola Tesla&#10;Kunci: A" oninput="hitungTotalSkor()"></textarea>
+      </div>
+
+      <button class="btn-generate" onclick="kirimData()">🚀 Generate Google Form</button>
+    </div>
+  </div>
+
+  <!-- POPUP MODAL PANDUAN -->
+  <div class="modal-overlay" id="modalPanduan">
+    <div class="modal-box modal-box-wide">
+      <h3 style="border-bottom: 2px solid #8d6e63; padding-bottom: 8px; margin-bottom: 16px;">💡 Panduan Penulisan Soal</h3>
+      <div class="panduan-content">
+        <b>[TEKS] WACANA BACAAN (Menempel ke soal di bawahnya dalam Halaman Baru)</b>
+        <pre>
+[TEKS] Bacalah paragraf berikut dengan saksama!
+Budi pergi ke pasar membeli apel dan jeruk.
+[PG] Kemana Budi pergi?
+A. Pasar
+B. Sekolah
+Kunci: A</pre>
+
+        <b>[PG] PILIHAN GANDA (Dinilai otomatis)</b>
+        <pre>
+[PG] Siapa penemu lampu pijar?
+A. Thomas Edison
+B. Nikola Tesla
+C. Albert Einstein
+Kunci: A</pre>
+
+        <b>[DROP] DROPDOWN / MENU TURUN (Dinilai otomatis)</b>
+        <pre>
+[DROP] Ibukota negara Indonesia saat ini adalah?
+A. Surabaya
+B. Jakarta
+C. Bandung
+Kunci: B</pre>
+
+        <b>[MATCH] MENJODOHKAN (Dinilai manual nantinya di GForm)</b>
+        <pre>
+[MATCH] Pasangkan penemu dengan temuannya!
+Baris:
+- Thomas Edison
+- Alexander Graham Bell
+Kolom:
+- Lampu Pijar
+- Telepon</pre>
+
+        <b>[SA] JAWABAN SINGKAT (Dinilai manual nantinya di GForm)</b>
+        <pre>
+[SA] Jelaskan secara singkat apa yang dimaksud fotosintesis!</pre>
+      </div>
+      <button class="modal-close" onclick="tutupPanduan()">Tutup Panduan</button>
+    </div>
+  </div>
+
+  <!-- POPUP MODAL PROSES & HASIL -->
+  <div class="modal-overlay" id="modalResult">
+    <div class="modal-box" id="modalBoxContent">
+      <!-- Konten dinamis -->
+    </div>
+  </div>
+
+  <footer>
+    <div style="font-weight: bold; margin-bottom: 4px;">© 2026 Exam Generator</div>
+    <div style="color: #9ca3af;">Created by L Setyawan, S.Pd</div>
+  </footer>
+
+  <script>
+    function bukaPanduan() { document.getElementById('modalPanduan').style.display = 'flex'; }
+    function tutupPanduan() { document.getElementById('modalPanduan').style.display = 'none'; }
+
+    function hitungTotalSkor() {
+      var teks = document.getElementById('soalText').value || '';
+      
+      var countPG = (teks.match(/\[PG\]/g) || []).length;
+      var countDROP = (teks.match(/\[DROP\]/g) || []).length;
+      var countMATCH = (teks.match(/\[MATCH\]/g) || []).length;
+      var countSA = (teks.match(/\[SA\]/g) || []).length;
+
+      var poinPG = document.querySelector('input[value="PG"]').checked ? (Number(document.getElementById('poinPG').value) || 0) : 0;
+      var poinDROP = document.querySelector('input[value="DROP"]').checked ? (Number(document.getElementById('poinDROP').value) || 0) : 0;
+      var poinMATCH = document.querySelector('input[value="MATCH"]').checked ? (Number(document.getElementById('poinMATCH').value) || 0) : 0;
+      var poinSA = document.querySelector('input[value="SA"]').checked ? (Number(document.getElementById('poinSA').value) || 0) : 0;
+
+      var total = (countPG * poinPG) + (countDROP * poinDROP) + (countMATCH * poinMATCH) + (countSA * poinSA);
+      
+      var displayEl = document.getElementById('totalNilaiDisplay');
+      displayEl.innerText = total;
+      
+      if(total === 100) { displayEl.style.color = "#16a34a"; } 
+      else { displayEl.style.color = "#dc2626"; } 
+    }
+
+    function kirimData() {
+      var checkboxes = document.querySelectorAll('input[name="modelSoal"]:checked');
+      var filterModel = [];
+      checkboxes.forEach(function(cb) { filterModel.push(cb.value); });
+
+      if(filterModel.length === 0) {
+        tampilkanPeringatan("Pilih Minimal Satu", "Pilih minimal satu model soal yang ingin diaktifkan.");
+        return;
+      }
+
+      var mapelVal = document.getElementById('mapel').value.trim();
+      if(!mapelVal) {
+        tampilkanPeringatan("Mata Pelajaran Kosong", "Nama Mata Pelajaran wajib diisi agar file tersimpan di Drive!");
+        return;
+      }
+
+      var box = document.getElementById('modalBoxContent');
+      box.innerHTML = `
+        <div class="spinner"></div>
+        <h3 style="margin-top: 10px;">Sedang Memproses...</h3>
+        <p>Merakit form dan menyimpannya ke folder <br><b>"Kumpulan soal ${mapelVal}"</b>.</p>
+      `;
+      document.getElementById('modalResult').style.display = 'flex';
+
+      var paketData = {
+        mapel: mapelVal,
+        judulForm: document.getElementById('judul').value,
+        filterModel: filterModel,
+        poinPG: document.getElementById('poinPG').value,
+        poinDROP: document.getElementById('poinDROP').value,
+        poinMATCH: document.getElementById('poinMATCH').value,
+        poinSA: document.getElementById('poinSA').value,
+        siswaText: document.getElementById('siswaText').value,
+        soalText: document.getElementById('soalText').value
+      };
+
+      google.script.run
+        .withSuccessHandler(tampilkanSukses)
+        .withFailureHandler(tampilkanGagal)
+        .prosesBuatForm(paketData);
+    }
+
+    function tampilkanPeringatan(judul, pesan) {
+      var box = document.getElementById('modalBoxContent');
+      box.innerHTML = `
+        <h3 style="color: #dc2626; font-size: 20px;">⚠️ ${judul}</h3><p style="font-size: 16px;">${pesan}</p>
+        <button class="modal-close" onclick="tutupModal()">Mengerti</button>`;
+      document.getElementById('modalResult').style.display = 'flex';
+    }
+
+    function tampilkanSukses(url) {
+      var box = document.getElementById('modalBoxContent');
+      box.innerHTML = `
+        <h3 style="color: #16a34a; font-size: 20px;">✅ Berhasil Dibuat!</h3>
+        <p style="font-size: 16px;">Form dirakit dan otomatis masuk ke folder Google Drive Anda.</p>
+        <a href="${url}" target="_blank">➡️ Buka Google Form ⬅️</a>
+        <button class="modal-close" onclick="tutupModal()">Tutup</button>`;
+    }
+
+    function tampilkanGagal(error) {
+      var box = document.getElementById('modalBoxContent');
+      box.innerHTML = `
+        <h3 style="color: #dc2626; font-size: 20px;">❌ Terjadi Kesalahan</h3><p style="font-size: 16px;">${error.message}</p>
+        <button class="modal-close" onclick="tutupModal()">Tutup</button>`;
+    }
+
+    function tutupModal() { document.getElementById('modalResult').style.display = 'none'; }
+  </script>
+</body>
+</html>
